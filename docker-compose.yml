@@ -1,0 +1,127 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: vadbuser
+      POSTGRES_PASSWORD: Riipen2026!
+      POSTGRES_DB: va_platform
+    volumes:
+      - /root/livekitva/postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - internal
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - internal
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./infra/otel/collector-config.yaml:/etc/otel/config.yaml
+    command: ["--config=/etc/otel/config.yaml"]
+    depends_on:
+      - tempo
+    networks:
+      - internal
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.6.0
+    volumes:
+      - ./infra/tempo/tempo.yml:/etc/tempo/tempo.yml
+      - /root/livekitva/tempo_data:/var/tempo
+    command: ["-config.file=/etc/tempo/tempo.yml"]
+    networks:
+      - internal
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /root/livekitva/prometheus_data:/prometheus
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d"]
+    depends_on:
+      - otel-collector
+    networks:
+      - internal
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: Riipen2026!
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: https://va.noblesolutionsenterprises.com/grafana
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - ./infra/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - /root/livekitva/grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - tempo
+    networks:
+      - internal
+      - my-network
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8001:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://vadbuser:Riipen2026!@postgres:5432/va_platform
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - postgres
+      - redis
+      - otel-collector
+    networks:
+      - internal
+      - my-network
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://vadbuser:Riipen2026!@postgres:5432/va_platform
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - postgres
+      - redis
+      - otel-collector
+    networks:
+      - internal
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    networks:
+      - internal
+      - my-network
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+  my-network:
+    external: true

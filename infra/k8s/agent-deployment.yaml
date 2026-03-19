@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: va-agent
+  labels:
+    app: va-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: va-agent
+  template:
+    metadata:
+      labels:
+        app: va-agent
+    spec:
+      terminationGracePeriodSeconds: 90  # 60s call drain + 30s buffer
+      containers:
+        - name: agent
+          image: va-platform-agent:latest
+          envFrom:
+            - secretRef:
+                name: va-platform-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              command: ["python", "-c", "import sys; sys.exit(0)"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: va-agent-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: va-agent
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60

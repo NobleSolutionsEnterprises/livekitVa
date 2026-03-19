@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For page transitions and premium setup wizard animations"
+  "recharts": "For dashboard analytics visualization (bar and pie charts)"
+  "react-dropzone": "For drag and drop document uploads in the RAG knowledge base"
+  "date-fns": "For elegant date and time formatting across tables"
+
+images:
+  - path: "artifacts/va-dashboard/public/images/logo.png"
+    description: "Minimal geometric logo mark in electric blue and white on a transparent background, modern SaaS startup aesthetic, highly legible"
+    aspect_ratio: "1:1"
+  - path: "artifacts/va-dashboard/public/images/hero-bg.png"
+    description: "Abstract gradient mesh background in very dark deep indigo and black with subtle soft blue light leaks, 8k resolution, premium dark mode aesthetic"
+    aspect_ratio: "16:9"
+
+notes:
+  - "Using generated API hooks from @workspace/api-client-react"
+  - "Auth flow relies on httpOnly cookies proxied through the Express server"

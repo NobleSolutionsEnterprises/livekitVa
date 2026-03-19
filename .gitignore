@@ -1,0 +1,26 @@
+# Environments
+.env
+
+node_modules/
+build/
+.next/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+coverage/
+.DS_Store
+
+# Dashboard build output (built locally, deployed to VPS)
+dashboard/dist/
+
+# Widget build output (keep in repo — deployed to external sites)
+!widget/dist/
+!widget/dist/widget.js
+
+# Data dirs (VPS only)
+postgres_data/
+grafana_data/
+prometheus_data/
+tempo_data/

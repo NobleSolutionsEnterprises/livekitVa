@@ -1,0 +1,15 @@
+livekit-agents==1.4.5
+livekit-plugins-openai==1.4.5
+livekit-plugins-deepgram==1.4.5
+livekit-plugins-silero==1.4.5
+livekit-plugins-groq==1.4.5
+openai>=2
+asyncpg
+pgvector
+redis[asyncio]
+sentence-transformers
+pybreaker
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+tiktoken
+python-dotenv
