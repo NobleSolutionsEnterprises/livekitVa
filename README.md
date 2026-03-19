@@ -187,6 +187,67 @@ Services:
 - Redis: localhost:6380
 - Grafana: http://localhost:3000
 
+## Widget Setup
+
+The widget is an embeddable script that adds a chat + voice call button to any website. It connects to the VA Platform API to let visitors chat or call a business's AI assistant.
+
+### Prerequisites
+
+1. The business must exist in the platform (created via the dashboard or API)
+2. You need the business's UUID (visible in the admin panel or database)
+3. Widget must be enabled for the business: set `widget_enabled = TRUE` and configure `widget_allowed_domains` in the business settings
+
+### Embedding the widget
+
+Add this script tag before the closing `</body>` tag on any page:
+
+```html
+<script
+  src="https://va.noblesolutionsenterprises.com/api/widget.js"
+  data-business-id="YOUR_BUSINESS_UUID"
+  data-api-url="https://va.noblesolutionsenterprises.com"
+  data-business-name="Your Business Name"
+  data-accent-color="#2563eb"
+></script>
+```
+
+### Attributes
+
+| Attribute | Required | Description |
+|---|---|---|
+| `data-business-id` | Yes | The business UUID from the platform |
+| `data-api-url` | No | API base URL. Defaults to same origin if omitted |
+| `data-business-name` | No | Displayed in the widget header. Defaults to "Chat with us" |
+| `data-accent-color` | No | Hex color for the widget button and header. Defaults to `#2563eb` |
+
+### How it works
+
+1. The script injects a floating button (bottom-right corner) into the page using Shadow DOM (no CSS conflicts with the host site)
+2. Clicking the button opens a panel with two tabs: **Chat** and **Call**
+3. **Chat tab**: Creates a chat session via `POST /api/widget/chat/sessions`, then sends/receives messages via the chat endpoints
+4. **Call tab**: Requests a LiveKit voice token via `POST /api/widget/token`, then connects the visitor's microphone to a LiveKit room where the AI agent joins automatically
+5. The widget is self-contained — no dependencies, no iframes, no external CSS
+
+### Hosting the widget script
+
+The built widget JS (`widget/dist/widget.js`) needs to be served from a URL accessible to the sites embedding it. Currently it's served from the `noblesolutionsenterprises.com` site at `/widget.js`. For other deployments:
+
+```bash
+# Rebuild the widget
+cd widget && npm run build
+
+# Copy to wherever your sites can load it from
+scp dist/widget.js your-server:/path/to/public/widget.js
+```
+
+### Programmatic removal
+
+To remove the widget from the page at runtime:
+
+```js
+window.__vaWidgetCleanup();
+```
+
 ## Missing Functionality
 
 The following features have frontend pages but **no backend implementation**:

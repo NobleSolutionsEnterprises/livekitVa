@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from db.connection import close_db, close_redis, init_db, init_redis
 from api.routes import admin, auth, businesses, calendar, calls, documents, events, outbound, webhooks, widget
@@ -48,3 +50,14 @@ app.include_router(documents.router, prefix="/api")
 app.include_router(outbound.router, prefix="/api")
 app.include_router(calendar.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
+
+WIDGET_JS = Path(__file__).resolve().parent.parent / "widget" / "dist" / "widget.js"
+
+
+@app.get("/api/widget.js")
+async def serve_widget_js():
+    return FileResponse(
+        WIDGET_JS,
+        media_type="application/javascript",
+        headers={"Cache-Control": "public, max-age=3600", "Access-Control-Allow-Origin": "*"},
+    )
