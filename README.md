@@ -277,10 +277,6 @@ The following features have frontend pages but **no backend implementation**:
 - `api/retention.py` exists but is not scheduled anywhere.
 - Needs: cron job or background task to purge expired data per `data_retention_days`.
 
-### Widget chat — full RAG pipeline
-- Chat endpoints work (`widget.py`) but use a simplified response.
-- Should use `ConversationEngine` (same as voice calls) for full RAG-powered answers.
-
 ### Generated API client types
 - The Orval-generated TypeScript client doesn't include `is_admin` on `MeResponseUser` or `owner_name`/`owner_email` on business list responses.
 - Runtime data has these fields but TypeScript types are incomplete. Regenerate from OpenAPI spec to fix.
