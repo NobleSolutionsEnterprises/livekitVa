@@ -12,6 +12,8 @@ jobs:
   triggers:
   - type: BranchUpdateTrigger
     branches: '*'
+  - !BranchUpdateTrigger
+    branches: '*'    
     userMatch: anyone
   - type: PullRequestMergeTrigger
   retryCondition: never
