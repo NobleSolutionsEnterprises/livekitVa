@@ -11,6 +11,7 @@ jobs:
     optional: false
   triggers:
   - type: BranchUpdateTrigger
+    branches: '*'
     userMatch: anyone
   - type: PullRequestMergeTrigger
   retryCondition: never
