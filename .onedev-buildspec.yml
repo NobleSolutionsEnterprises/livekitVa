@@ -1,0 +1,19 @@
+version: 44
+jobs:
+- name: pushtoGithub
+  steps:
+  - type: PushRepository
+    name: pushLivekitVA
+    remoteUrl: https://github.com/NobleSolutionsEnterprises/livekitVa.git
+    passwordSecret: mirror-Token
+    force: false
+    condition: SUCCESSFUL
+    optional: false
+  triggers:
+  - type: BranchUpdateTrigger
+    userMatch: anyone
+  - type: PullRequestMergeTrigger
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 14400
